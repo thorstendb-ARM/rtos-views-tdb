@@ -5,9 +5,12 @@ import * as path from 'path';
 import * as RTOSCommon from './rtos-common';
 import { RTOSFreeRTOS } from './rtos-freertos';
 import { RTOSUCOS2 } from './rtos-ucosii';
+import { RTOSUCOS3 } from './rtos-ucosiii';
 import { RTOSEmbOS } from './rtos-embos';
 import { RTOSChibiOS } from './rtos-chibios';
 import { RTOSZEPHYR } from './rtos-zephyr';
+import { RTOSThreadX } from './rtos-threadx';
+import { RTOSRTX5 } from './rtos-rtx5';
 
 import {
     IDebugTracker,
@@ -24,7 +27,8 @@ export const TrackedDebuggers = [
     'cortex-debug',
     'cppdbg', // Microsoft debugger
     'cspy', // IAR debugger
-    'mplab-core-da' // Microchip debugger
+    'mplab-core-da', // Microchip debugger
+    'gdbtarget', // Eclipse-CDT-GDB debugger
 ];
 
 let trackerApi: IDebugTracker;
@@ -35,11 +39,17 @@ const RTOS_TYPES = {
     FreeRTOS: RTOSFreeRTOS,
     // eslint-disable-next-line @typescript-eslint/naming-convention
     'uC/OS-II': RTOSUCOS2,
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    'uC/OS-III': RTOSUCOS3,
     embOS: RTOSEmbOS,
     // eslint-disable-next-line @typescript-eslint/naming-convention
     ChibiOS: RTOSChibiOS,
     // eslint-disable-next-line @typescript-eslint/naming-convention
     Zephyr: RTOSZEPHYR,
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    ThreadX: RTOSThreadX,
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    RTX5: RTOSRTX5,
 };
 
 const defaultHtmlInfo: RTOSCommon.HtmlInfo = { html: '', css: '' };
@@ -410,7 +420,7 @@ export class RTOSTracker implements DebugEventHandler {
             }
             try {
                 await this.update();
-            } catch { }
+            } catch {}
         }
     }
 
@@ -490,7 +500,7 @@ class RTOSViewProvider implements vscode.WebviewViewProvider {
     public static readonly viewType = 'rtos-views.rtos';
     private webviewView: vscode.WebviewView | undefined;
 
-    constructor(private readonly extensionUri: vscode.Uri, private parent: RTOSTracker) { }
+    constructor(private readonly extensionUri: vscode.Uri, private parent: RTOSTracker) {}
 
     public resolveWebviewView(
         webviewView: vscode.WebviewView,
@@ -503,7 +513,7 @@ class RTOSViewProvider implements vscode.WebviewViewProvider {
         webviewView.webview.options = {
             // Allow scripts in the webview
             enableScripts: true,
-            localResourceRoots: [this.extensionUri]
+            localResourceRoots: [this.extensionUri],
         };
         this.webviewView.description = 'View RTOS internals';
 
